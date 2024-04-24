@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
   // H_STO3G.print("H_STO3G");
   // C_STO3G.print("C_STO3G");
 
-  vector<AO> MoleculeAOs;
+  vector<Atomic_orbital> MoleculeAOs;
   int num_ele;
 
   if (argc != 2) {

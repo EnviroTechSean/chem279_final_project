@@ -12,8 +12,8 @@
 using namespace std;
 
 // return number of electrons
-int GenerateAOs(vector<AO> &AOs, string &fname, arma::mat &H_basis,
-                arma::mat &C_basis) {
+int GenerateAOs(vector<Atomic_orbital> &AOs, const string &fname, const arma::mat &H_basis,
+                const arma::mat &C_basis) {
   int basislen = H_basis.n_rows;
   assert(C_basis.n_rows == basislen);
   int num_charge;
@@ -43,21 +43,21 @@ int GenerateAOs(vector<AO> &AOs, string &fname, arma::mat &H_basis,
       alpha = H_basis.col(0);
       d_coe = H_basis.col(1);
       string lable("H1s");
-      AO readedAO(R0, alpha, d_coe, lmn, lable);
+      Atomic_orbital readedAO(R0, alpha, d_coe, lmn, lable);
       AOs.push_back(readedAO);
     } else {
       if (AtomicN == 6) {
         alpha = C_basis.col(0);
         d_coe = C_basis.col(1);
         string lable("C2s");
-        AO readedAO(R0, alpha, d_coe, lmn, lable);
+        Atomic_orbital readedAO(R0, alpha, d_coe, lmn, lable);
         AOs.push_back(readedAO);
         for (size_t j = 0; j < 3; j++) {
           d_coe = C_basis.col(2);
           lmn.zeros();
           lmn(j) = 1;
           string lable("C2p");
-          AO readedAOp(R0, alpha, d_coe, lmn, lable);
+          Atomic_orbital readedAOp(R0, alpha, d_coe, lmn, lable);
           AOs.push_back(readedAOp);
         }
       } else
@@ -78,17 +78,17 @@ int GenerateAOs(vector<AO> &AOs, string &fname, arma::mat &H_basis,
 //   R0(0)=x0_input; R0(1)=y0_input; R0(2)=z0_input; alpha=alpha_input;
 //   l=l_input;
 // }
-void PrintAOs(std::vector<AO> &AOs) {
+void PrintAOs(std::vector<Atomic_orbital> &AOs) {
   for (auto ao : AOs)
     ao.printinfo();
 }
 
-void AO::printinfo() {
+void Atomic_orbital::printinfo() {
   printf("This AO info: %s, R( %1.2f, %1.2f, %1.2f), with angular momentum: "
          "%lld %lld %lld\n",
-         lable.c_str(), R0(0), R0(1), R0(2), lmn(0), lmn(1), lmn(2));
-  d_coe.print("d_coe");
-  alpha.print("alpha");
+         atomic_orbital_label.c_str(), center(0), center(1), center(2), lmn(0), lmn(1), lmn(2));
+  primitive_dcoefs.print("d_coe");
+  primitive_exponents.print("alpha");
 }
 
 double Overlap_onedim(double xa, double xb, double alphaa, double alphab,
@@ -131,21 +131,21 @@ double Overlap_3d(arma::vec &Ra, arma::vec &Rb, double alphaa, double alphab,
   return Overlap;
 }
 
-AO::AO(arma::vec &R0_input, arma::vec &alpha_input, arma::vec &d_input,
+Atomic_orbital::Atomic_orbital(arma::vec &R0_input, arma::vec &alpha_input, arma::vec &d_input,
        arma::uvec &lmn_input, string lable_input)
-    : R0(R0_input), alpha(alpha_input), d_coe(d_input), lmn(lmn_input),
-      lable(lable_input) {
-  assert(R0.n_elem == 3);
+    : center(R0_input), primitive_exponents(alpha_input), primitive_dcoefs(d_input), lmn(lmn_input),
+      atomic_orbital_label(lable_input) {
+  assert(center.n_elem == 3);
   assert(lmn.n_elem == 3);
-  len = alpha.n_elem;
-  assert(d_coe.n_elem == len);
+  len = primitive_exponents.n_elem;
+  assert(primitive_dcoefs.n_elem == len);
   for (size_t k = 0; k < len; k++) {
-    double Overlap_Self = Overlap_3d(R0, R0, alpha(k), alpha(k), lmn, lmn);
-    d_coe(k) /= sqrt(Overlap_Self);
+    double Overlap_Self = Overlap_3d(center, center, primitive_exponents(k), primitive_exponents(k), lmn, lmn);
+    primitive_dcoefs(k) /= sqrt(Overlap_Self);
   }
 }
 
-double Eval_Ov_AOs(AO &sh1, AO &sh2) {
+double Eval_Ov_AOs(Atomic_orbital &sh1, Atomic_orbital &sh2) {
 
   int len = sh1.get_len();
   assert(sh2.get_len() == len);
@@ -167,7 +167,7 @@ double Eval_Ov_AOs(AO &sh1, AO &sh2) {
   return sum;
 }
 
-void Eval_OV_mat(vector<AO> &MoleculeAOs, arma::mat &OV_mat) {
+void Eval_OV_mat(vector<Atomic_orbital> &MoleculeAOs, arma::mat &OV_mat) {
   int dim = MoleculeAOs.size();
   assert(OV_mat.n_rows == dim && OV_mat.n_cols == dim);
   for (size_t k = 0; k < dim; k++) {

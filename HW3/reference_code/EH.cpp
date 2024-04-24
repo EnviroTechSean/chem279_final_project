@@ -15,7 +15,7 @@ std::map<std::string, double> h_map{
     {"C2p", -11.4},
 };
 
-void Generate_Hmat(mat &OV_mat, vector<AO> &AOs, mat &H_mat) {
+void Generate_Hmat(mat &OV_mat, vector<Atomic_orbital> &AOs, mat &H_mat) {
   int dim = AOs.size();
   assert(OV_mat.n_rows == dim && OV_mat.n_cols == dim);
   assert(H_mat.n_rows == dim && H_mat.n_cols == dim);
