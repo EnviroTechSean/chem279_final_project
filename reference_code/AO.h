@@ -5,44 +5,43 @@
 #include <iostream>
 #include <vector>
 
-class Atom;
-class AO {
+class Atomic_orbital {
 private:
-  arma::vec R0;
+  arma::vec center;
+  arma::vec exponents;
+  arma::vec d_coefs;
   arma::uvec lmn;
-  arma::vec alpha;
-  arma::vec d_coe;
-  int len;
-  std::string lable;
+  std::string label;
+  int num_primatives;
   // Atom *belong;
 public:
-  AO(arma::vec &R0_input, arma::vec &alpha_input, arma::vec &d_input,
-     arma::uvec &lmn_input, std::string lable_input);
-  ~AO() {}
+  Atomic_orbital(arma::vec &center_input, arma::vec &alpha_input, arma::vec &d_input,
+     arma::uvec &lmn_input, std::string label_input);
+  ~Atomic_orbital() {}
   void printinfo();
   arma::uvec get_lmn() { return lmn; }
-  arma::vec get_alpha() { return alpha; }
-  arma::vec get_d_coe() { return d_coe; }
-  arma::vec get_R0() { return R0; }
-  int get_len() { return len; }
-  std::string get_lable() { return lable; }
-  void set_R0(arma::vec &R0i) { R0 = R0i; }
+  arma::vec get_alpha() { return exponents; }
+  arma::vec get_d_coe() { return d_coefs; }
+  arma::vec get_center() { return center; }
+  int get_num_primatives() { return num_primatives; }
+  std::string get_label() { return label; }
+  void set_center(arma::vec &centeri) { center = centeri; }
   // void set_belongAtom(Atom *belongi){ belong = belongi;}
 };
 
 class Atom {
 public:
-  std::vector<AO> mAOs;
+  std::vector<Atomic_orbital> mAOs;
   std::string name;
   int VAN; // Valence atomic number
   Atom() : name("0") {}
-  Atom(std::vector<AO> AOs) : mAOs(AOs), name("0") {}
-  Atom(std::vector<AO> AOs, std::string atomname, int VAN_i)
+  Atom(std::vector<Atomic_orbital> AOs) : mAOs(AOs), name("0") {}
+  Atom(std::vector<Atomic_orbital> AOs, std::string atomname, int VAN_i)
       : mAOs(AOs), name(atomname), VAN(VAN_i) {}
   Atom(std::string atomname, int VAN_i) : name(atomname), VAN(VAN_i) {}
-  void addAO(AO aAO) { mAOs.push_back(aAO); }
+  void addAO(Atomic_orbital aAO) { mAOs.push_back(aAO); }
   void PrintAOs();
-  void set_R0(arma::vec &R0i);
+  void set_center(arma::vec &centeri);
 };
 
 class Molecule_basis {
@@ -70,8 +69,8 @@ public:
   void eval_nuc_1st(arma::mat &nuc_1st);
 };
 
-double Eval_Ov_AOs(AO &sh1, AO &sh2);
+double Eval_Ov_AOs(Atomic_orbital &sh1, Atomic_orbital &sh2);
 
-double Eval_2eI_sAO(AO &sh1, AO &sh2);
+double Eval_2eI_sAO(Atomic_orbital &sh1, Atomic_orbital &sh2);
 
 #endif // AO_H

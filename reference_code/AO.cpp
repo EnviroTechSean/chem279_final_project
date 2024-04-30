@@ -18,20 +18,20 @@ void Atomic_orbital::printinfo() {
          "%lld %lld %lld\n",
          label.c_str(), center(0), center(1), center(2), lmn(0), lmn(1),
          lmn(2));
-  d_coefs.print("d_coe");
-  exponents.print("alpha");
+  d_coefs.print("d_coefs");
+  exponents.print("exponents");
 }
 
-Atomic_orbital::Atomic_orbital(arma::vec &R0_input, arma::vec &alpha_input,
-                               arma::vec &d_input, arma::uvec &lmn_input,
-                               string lable_input)
-    : center(R0_input), exponents(alpha_input), d_coefs(d_input),
-      lmn(lmn_input), label(lable_input) {
+Atomic_orbital::Atomic_orbital(arma::vec &center_input, arma::vec &exponents_input,
+                               arma::vec &d_coeffs_input, arma::uvec &lmn_input,
+                               string label_input)
+    : center(center_input), exponents(exponents_input), d_coefs(d_coeffs_input),
+      lmn(lmn_input), label(label_input) {
   assert(center.n_elem == 3);
   assert(lmn.n_elem == 3);
-  len = exponents.n_elem;
-  assert(d_coefs.n_elem == len);
-  for (size_t k = 0; k < len; k++) {
+  assert(d_coefs.n_elem == exponents.n_elem);
+  num_primatives = exponents.n_elem;
+  for (size_t k = 0; k < num_primatives; k++) {
     double Overlap_Self =
         Overlap_3d(center, center, exponents(k), exponents(k), lmn, lmn);
     d_coefs(k) /= sqrt(Overlap_Self);
@@ -41,16 +41,16 @@ Atomic_orbital::Atomic_orbital(arma::vec &R0_input, arma::vec &alpha_input,
 std::map<std::string, int> VAN_map{
     {"H", 1}, {"C", 4}, {"N", 5}, {"O", 6}, {"F", 7},
 };
-Atom GenerateAtom(std::string atomname, arma::vec R0) {
-  std::string basisname = atomname + "_STO3G.txt";
+Atom GenerateAtom(std::string atomname, arma::vec center) {
+  std::string basisname = "../basis/" + atomname + "_STO3G.txt";
   arma::mat basis;
   basis.load(basisname);
 
   arma::uvec lmn = {0, 0, 0};
   arma::vec alpha = basis.col(0);
   arma::vec d_coe = basis.col(1);
-  string lable("s");
-  Atomic_orbital AO_s(R0, alpha, d_coe, lmn, lable);
+  string label("s");
+  Atomic_orbital AO_s(center, alpha, d_coe, lmn, label);
   if (atomname == string("H")) {
     Atom aatom(atomname, 1);
     aatom.addAO(AO_s);
@@ -66,18 +66,18 @@ Atom GenerateAtom(std::string atomname, arma::vec R0) {
     d_coe = basis.col(2);
     lmn.zeros();
     lmn(j) = 1;
-    string lable("p");
-    Atomic_orbital readedAOp(R0, alpha, d_coe, lmn, lable);
+    string label("p");
+    Atomic_orbital readedAOp(center, alpha, d_coe, lmn, label);
     aatom.addAO(readedAOp);
   }
   return aatom;
 }
 
 double Eval_Ov_AOs(Atomic_orbital &ao1, Atomic_orbital &ao2) {
-  int len = ao1.get_len();
-  assert(ao2.get_len() == len);
+  int len = ao1.get_num_primatives();
+  assert(ao2.get_num_primatives() == len);
   arma::vec alphaa = ao1.get_alpha(), alphab = ao2.get_alpha();
-  arma::vec Ra = ao1.get_R0(), Rb = ao2.get_R0();
+  arma::vec Ra = ao1.get_center(), Rb = ao2.get_center();
   arma::uvec la = ao1.get_lmn(), lb = ao2.get_lmn();
   arma::vec da = ao1.get_d_coe(), db = ao2.get_d_coe();
 
@@ -96,10 +96,10 @@ double Eval_Ov_AOs(Atomic_orbital &ao1, Atomic_orbital &ao2) {
 
 void Eval_Ov1st_AOs(arma::vec &OV1st, Atomic_orbital &ao1,
                     Atomic_orbital &ao2) {
-  int len = ao1.get_len();
-  assert(ao2.get_len() == len);
+  int len = ao1.get_num_primatives();
+  assert(ao2.get_num_primatives() == len);
   arma::vec alphaa = ao1.get_alpha(), alphab = ao2.get_alpha();
-  arma::vec Ra = ao1.get_R0(), Rb = ao2.get_R0();
+  arma::vec Ra = ao1.get_center(), Rb = ao2.get_center();
   arma::uvec la = ao1.get_lmn(), lb = ao2.get_lmn();
   arma::vec da = ao1.get_d_coe(), db = ao2.get_d_coe();
 
@@ -123,9 +123,9 @@ double Eval_2eI_sAO(Atomic_orbital &ao1, Atomic_orbital &ao2) {
   arma::uvec la = ao1.get_lmn(), lb = ao2.get_lmn();
   if (!(arma::accu(la) == 0 && arma::accu(lb) == 0))
     throw invalid_argument("Eval_2eI_sAO is only used for s Orbitals.");
-  int len = ao1.get_len();
-  assert(ao2.get_len() == len);
-  arma::vec Ra = ao1.get_R0(), Rb = ao2.get_R0();
+  int len = ao1.get_num_primatives();
+  assert(ao2.get_num_primatives() == len);
+  arma::vec Ra = ao1.get_center(), Rb = ao2.get_center();
   arma::vec alphaa = ao1.get_alpha(), alphab = ao2.get_alpha();
   arma::vec da = ao1.get_d_coe(), db = ao2.get_d_coe();
 
@@ -152,9 +152,9 @@ void Eval_2eI1st_sAO(arma::vec &Gamma1st, Atomic_orbital &ao1,
   arma::uvec la = ao1.get_lmn(), lb = ao2.get_lmn();
   if (!(arma::accu(la) == 0 && arma::accu(lb) == 0))
     throw invalid_argument("Eval_2eI_sAO is only used for s Orbitals.");
-  int len = ao1.get_len();
-  assert(ao2.get_len() == len);
-  arma::vec Ra = ao1.get_R0(), Rb = ao2.get_R0();
+  int len = ao1.get_num_primatives();
+  assert(ao2.get_num_primatives() == len);
+  arma::vec Ra = ao1.get_center(), Rb = ao2.get_center();
   arma::vec alphaa = ao1.get_alpha(), alphab = ao2.get_alpha();
   arma::vec da = ao1.get_d_coe(), db = ao2.get_d_coe();
 
@@ -192,10 +192,10 @@ Molecule_basis::Molecule_basis(const string &fname, const arma::mat &H_basis,
 
   while (getline(in, line)) {
     istringstream iss(line);
-    arma::vec R0(3);
+    arma::vec center(3);
     // int AtomicN = 0;
     string atomnumber;
-    if (!(iss >> atomnumber >> R0[0] >> R0[1] >> R0[2]))
+    if (!(iss >> atomnumber >> center[0] >> center[1] >> center[2]))
       throw invalid_argument("There is some problem with AO format.");
 
     if (AN_map.find(atomnumber) == AN_map.end()) {
@@ -206,7 +206,7 @@ Molecule_basis::Molecule_basis(const string &fname, const arma::mat &H_basis,
     arma::uvec lmn = {0, 0, 0};
     arma::vec alpha(basislen);
     arma::vec d_coe(basislen);
-    Atom readAtom = GenerateAtom(atomname, R0);
+    Atom readAtom = GenerateAtom(atomname, center);
     mAtoms.push_back(readAtom);
     // cout << readAO << std::endl;
     count_atoms++;
@@ -227,9 +227,9 @@ void Atom::PrintAOs() {
     ao.printinfo();
   printf("\n");
 }
-void Atom::set_R0(arma::vec &R0i) {
+void Atom::set_center(arma::vec &centeri) {
   for (auto &ao : mAOs)
-    ao.set_R0(R0i);
+    ao.set_center(centeri);
 }
 
 void Molecule_basis::PrintAtoms() {
@@ -271,7 +271,7 @@ void Molecule_basis::eval_OV1stmat(arma::mat &OV_1stmat) {
   for (size_t k = 0; k < dim; k++)
     for (size_t j = 0; j < dim; j++) {
       arma::vec OV_1AO(OV_1stmat.colptr(k * dim + j), 3, false, true);
-      if (arma::approx_equal(allAOs[k].get_R0(), allAOs[j].get_R0(), "absdiff",
+      if (arma::approx_equal(allAOs[k].get_center(), allAOs[j].get_center(), "absdiff",
                              1e-5))
         OV_1AO.zeros();
       else
@@ -315,9 +315,9 @@ double Molecule_basis::eval_nuc_E() {
   double Ec = 0;
   int dim = mAtoms.size();
   for (size_t k = 0; k < dim; k++) {
-    arma::vec Ra = mAtoms[k].mAOs[0].get_R0();
+    arma::vec Ra = mAtoms[k].mAOs[0].get_center();
     for (size_t j = 0; j < k; j++) {
-      arma::vec Rb = mAtoms[j].mAOs[0].get_R0();
+      arma::vec Rb = mAtoms[j].mAOs[0].get_center();
       double Rd = arma::norm(Ra - Rb, 2);
       Ec += mAtoms[k].VAN * mAtoms[j].VAN / Rd;
     }
@@ -330,11 +330,11 @@ void Molecule_basis::eval_nuc_1st(arma::mat &nuc_1st) {
   assert(nuc_1st.n_rows == 3 && nuc_1st.n_cols == dim);
   for (size_t k = 0; k < dim; k++) {
     arma::vec gradient_A(nuc_1st.colptr(k), 3, false, true);
-    arma::vec Ra = mAtoms[k].mAOs[0].get_R0();
+    arma::vec Ra = mAtoms[k].mAOs[0].get_center();
     for (size_t j = 0; j < dim; j++) {
       if (j == k)
         continue;
-      arma::vec Rb = mAtoms[j].mAOs[0].get_R0();
+      arma::vec Rb = mAtoms[j].mAOs[0].get_center();
       double Rd = arma::norm(Ra - Rb, 2);
       gradient_A -= mAtoms[k].VAN * mAtoms[j].VAN / pow(Rd, 3) * (Ra - Rb);
     }

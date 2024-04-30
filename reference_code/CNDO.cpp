@@ -60,8 +60,8 @@ int CNDO::init() {
     double ZA = double(A_Atom.VAN);
     double gammaAA = gamma(k, k);
     CNDO_para A_para = CNDO_para_map[A_Atom.name];
-    for (auto ao_A : A_Atom.molecule_AOs) {
-      H_core(k_AO, k_AO) = -A_para.IA[ao_A.get_lable()] - (ZA - 0.5) * gammaAA;
+    for (auto ao_A : A_Atom.mAOs) {
+      H_core(k_AO, k_AO) = -A_para.IA[ao_A.get_label()] - (ZA - 0.5) * gammaAA;
       // H_core.print("H_core");
       size_t j_AO = 0;
       for (size_t j = 0; j < num_atoms; j++) {
@@ -71,7 +71,7 @@ int CNDO::init() {
         if (k != j)
           H_core(k_AO, k_AO) -= double(B_Atom.VAN) * gamma(k, j);
         // cout<< k_AO << " " << H_core(k_AO, k_AO)<< endl;
-        for (auto ao : B_Atom.molecule_AOs) {
+        for (auto ao : B_Atom.mAOs) {
           if (k_AO != j_AO)
             H_core(k_AO, j_AO) = averagebeta * S(k_AO, j_AO);
           j_AO++;
@@ -95,7 +95,7 @@ int CNDO::updateG() {
   arma::vec P_t = arma::zeros(num_atoms);
   size_t k_AO = 0;
   for (size_t k = 0; k < num_atoms; k++)
-    for (auto ao : mol.mAtoms[k].molecule_AOs) {
+    for (auto ao : mol.mAtoms[k].mAOs) {
       P_t(k) += Pa(k_AO, k_AO) + Pb(k_AO, k_AO);
       k_AO++;
     }
@@ -103,7 +103,7 @@ int CNDO::updateG() {
   k_AO = 0;
   for (size_t k = 0; k < num_atoms; k++) {
     double gammaAA = gamma(k, k);
-    for (auto ao_A : mol.mAtoms[k].molecule_AOs) {
+    for (auto ao_A : mol.mAtoms[k].mAOs) {
       Ga(k_AO, k_AO) = (P_t(k) - Pa(k_AO, k_AO)) * gammaAA;
       Gb(k_AO, k_AO) = (P_t(k) - Pb(k_AO, k_AO)) * gammaAA;
       size_t j_AO = 0;
@@ -113,7 +113,7 @@ int CNDO::updateG() {
           Ga(k_AO, k_AO) += P_t(j) * gammaAB;
           Gb(k_AO, k_AO) += P_t(j) * gammaAB;
         }
-        for (auto ao : mol.mAtoms[j].molecule_AOs) {
+        for (auto ao : mol.mAtoms[j].mAOs) {
           if (k_AO != j_AO) {
             Ga(k_AO, j_AO) = -gammaAB * Pa(k_AO, j_AO);
             Gb(k_AO, j_AO) = -gammaAB * Pb(k_AO, j_AO);
@@ -201,7 +201,7 @@ arma::mat CNDO::getGradient() {
   arma::vec P_t = arma::zeros(num_atoms);
   size_t k_AO = 0;
   for (size_t k = 0; k < num_atoms; k++)
-    for (auto ao : mol.mAtoms[k].molecule_AOs) {
+    for (auto ao : mol.mAtoms[k].mAOs) {
       P_t(k) += P(k_AO, k_AO);
       k_AO++;
     }
@@ -217,17 +217,17 @@ arma::mat CNDO::getGradient() {
       Atom &B_Atom = mol.mAtoms[j];
       double betaApB = betaA + CNDO_para_map[B_Atom.name].beta;
       if (j == k) {
-        j_AO_off += B_Atom.molecule_AOs.size();
+        j_AO_off += B_Atom.mAOs.size();
         continue;
       }
       double temp = P_t(k) * P_t(j) - P_t(k) * B_Atom.VAN - P_t(j) * A_Atom.VAN;
       gradient_A += temp * gamma_RA.col(k * num_atoms + j);
       // gradient_A += P_t(k) *(P_t(j) - 2* B_Atom.VAN) * gamma_RA.col(k *
       // num_atoms + j);
-      for (size_t k_AO = k_AO_off; k_AO < k_AO_off + A_Atom.molecule_AOs.size();
+      for (size_t k_AO = k_AO_off; k_AO < k_AO_off + A_Atom.mAOs.size();
            k_AO++)
         for (size_t j_AO = j_AO_off;
-             j_AO < j_AO_off + B_Atom.molecule_AOs.size(); j_AO++) {
+             j_AO < j_AO_off + B_Atom.mAOs.size(); j_AO++) {
           //     cout << " j =  " << j << " k =  " << k  << " j_AO =  " << j_AO
           //     << " k_AO =  " << k_AO <<" " <<betaApB * P(k_AO, j_AO) << endl;
           //     arma::vec temp = OV_RA.col(k * num_atoms + j);
@@ -237,9 +237,9 @@ arma::mat CNDO::getGradient() {
                          Pb(k_AO, j_AO) * Pb(k_AO, j_AO)) *
                         gamma_RA.col(k * num_atoms + j);
         }
-      j_AO_off += B_Atom.molecule_AOs.size();
+      j_AO_off += B_Atom.mAOs.size();
     }
-    k_AO_off += A_Atom.molecule_AOs.size();
+    k_AO_off += A_Atom.mAOs.size();
   }
   if (k_AO != dim)
     cout << "warn! the number of AOs is wrong." << endl;

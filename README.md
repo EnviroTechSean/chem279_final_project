@@ -20,3 +20,12 @@ https://www.youtube.com/watch?v=PnwpoCDA5IM
 Open bug exists in matplotlib 3d scatter plot opacity:
 https://stackoverflow.com/questions/71904575/matplotlib-3d-scatter-plot-alpha-varies-when-viewing-different-angles
 references https://github.com/matplotlib/matplotlib/issues/22861
+
+# Usage
+To compile the code, enter the command `make all` under this directory.
+
+```
+./HW5 <filename>
+```
+`<filename>`: The path to the input file containing information of the molecule.
+
