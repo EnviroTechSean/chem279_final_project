@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
-def generate_points():
-    return None
+def generate_h2_points():
+    return [(0, 0, 0)] * 41
 
 """
 If dragging the scatter is no good, azimuth and elevation view inits

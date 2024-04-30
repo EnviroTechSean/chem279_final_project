@@ -52,8 +52,7 @@ public:
   Molecule_basis(std::vector<Atom> Atoms) : mAtoms(Atoms), num_ele(0) {}
   Molecule_basis(std::vector<Atom> Atoms, int cha)
       : mAtoms(Atoms), num_ele(cha) {}
-  Molecule_basis(const std::string &fname, const arma::mat &H_basis,
-                 const arma::mat &C_basis);
+  Molecule_basis(const std::string &fname);
   void addAtom(Atom aAtom) { mAtoms.push_back(aAtom); }
   void setnum_ele(int cha) { num_ele = cha; }
   void PrintAtoms();

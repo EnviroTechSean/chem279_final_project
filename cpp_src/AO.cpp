@@ -174,10 +174,7 @@ void Eval_2eI1st_sAO(arma::vec &Gamma1st, Atomic_orbital &ao1,
 
 std::map<std::string, std::string> AN_map{
     {"1", "H"}, {"6", "C"}, {"7", "N"}, {"8", "O"}, {"9", "F"}};
-Molecule_basis::Molecule_basis(const string &fname, const arma::mat &H_basis,
-                               const arma::mat &C_basis) {
-  int basislen = H_basis.n_rows;
-  assert(C_basis.n_rows == basislen);
+Molecule_basis::Molecule_basis(const string &fname) {
   int num_charge, num_Atoms;
 
   ifstream in(fname, ios::in);
@@ -204,8 +201,6 @@ Molecule_basis::Molecule_basis(const string &fname, const arma::mat &H_basis,
 
     string atomname = AN_map[atomnumber];
     arma::uvec lmn = {0, 0, 0};
-    arma::vec alpha(basislen);
-    arma::vec d_coe(basislen);
     Atom readAtom = GenerateAtom(atomname, center);
     mAtoms.push_back(readAtom);
     // cout << readAO << std::endl;
