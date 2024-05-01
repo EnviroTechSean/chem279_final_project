@@ -2,6 +2,7 @@
 #include "util.h"
 #include <cassert>
 #include <fstream>
+#include <iomanip>
 #include <math.h>
 #include <sstream>
 #include <stdexcept>
@@ -38,6 +39,33 @@ Atomic_orbital::Atomic_orbital(arma::vec &center_input, arma::vec &exponents_inp
   }
 }
 
+double Atomic_orbital::evaluate(const arma::vec &point) const
+{
+  double total_value = 0.0; // The return value, after updates in loop
+
+  arma::vec distance = point - center;
+  double distance_from_center_squared = arma::dot(distance, distance);
+  double x_diff = distance[0]; 
+  double y_diff = distance[1]; 
+  double z_diff = distance[2]; 
+
+  double primitive_contribution;
+
+  for (size_t i = 0; i < num_primatives; i++)
+  {
+    // Start by multiplying the x y and z distances to the primitive contribution
+    primitive_contribution = pow(x_diff, lmn[0]) * pow(y_diff, lmn[1]) * pow(z_diff, lmn[2]);
+    // Now add normalized d coefficient for the relevant gaussian
+    primitive_contribution *= d_coefs[i];
+    // Now do the exponential term
+    primitive_contribution *= exp(-exponents[i] * distance_from_center_squared);
+
+    total_value += primitive_contribution;
+  }
+  return total_value;
+}
+
+
 std::map<std::string, int> VAN_map{
     {"H", 1}, {"C", 4}, {"N", 5}, {"O", 6}, {"F", 7},
 };
@@ -50,6 +78,16 @@ Atom GenerateAtom(std::string atomname, arma::vec center) {
   arma::vec alpha = basis.col(0);
   arma::vec d_coe = basis.col(1);
   string label("s");
+
+  // Convert each double in the center vector to string with precision and add to label
+  std::ostringstream oss;
+  oss << std::fixed << std::setprecision(2); // Set precision to 2 decimal places
+  for (size_t i = 0; i < center.size(); ++i) {
+    oss << "_" << center(i);
+  }
+  // Append coordinates to label
+  label += oss.str();
+
   Atomic_orbital AO_s(center, alpha, d_coe, lmn, label);
   if (atomname == string("H")) {
     Atom aatom(atomname, 1);

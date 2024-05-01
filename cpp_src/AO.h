@@ -27,6 +27,10 @@ public:
   std::string get_label() { return label; }
   void set_center(arma::vec &centeri) { center = centeri; }
   // void set_belongAtom(Atom *belongi){ belong = belongi;}
+
+  // Adding this for my final project: will be used to calculate many many grid points
+  double evaluate(const arma::vec &point) const;
+
 };
 
 class Atom {

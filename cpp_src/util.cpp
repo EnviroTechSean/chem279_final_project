@@ -63,11 +63,11 @@ double Overlap_onedim(double xa, double xb, double alphaa, double alphab,
       double numerator =
           pow(xP - xa, la - i_index) * pow(xP - xb, lb - j_index);
       // Caution: convert i_index + j_index to float!
-      double dominator =
+      double denominator =
           pow(2 * (alphaa + alphab), double(i_index + j_index) / 2.0);
-      double temp = C_part * DF_part * numerator / dominator;
+      double temp = C_part * DF_part * numerator / denominator;
       result += temp;
-      // printf("%f %f %f %f  %f\n", C_part, DF_part, numerator, dominator,
+      // printf("%f %f %f %f  %f\n", C_part, DF_part, numerator, denominator,
       // temp);
     }
 

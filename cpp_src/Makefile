@@ -43,7 +43,7 @@ $(MO_POINTS_MAIN): $(MO_POINTS_OBJS)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<  -o $@
 
 clean:
-	$(RM) *.o *~ $(OLD_MAIN) $(MO_POINTS_MAIN)
+	$(RM) *.o *~ $(OLD_MAIN) $(MO_POINTS_MAIN) *.txt
 
 depend: $(SRCS) $(MO_POINTS_SRCS)
 	makedepend $(INCLUDES) $^
