@@ -7,9 +7,10 @@ def plot_filtered_surfaces(datasets, level, colors, centers, grid_range=(-1, 1))
     # colors is a list of colors corresponding to each dataset
     # centers is a list of tuples, each representing the center of the corresponding Gaussian dataset
 
-    # Plotting
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
+
+    max_range = np.array([0, 0, 0])  # Array to store the maximum range needed for all axes
 
     for data, color, center in zip(datasets, colors, centers):
         n_points = data.shape[0]  # Handle varying sizes within the datasets
@@ -22,16 +23,27 @@ def plot_filtered_surfaces(datasets, level, colors, centers, grid_range=(-1, 1))
         offset = center - np.array([linspace[int(n_points/2)] for _ in range(3)]) * scale_factor
         verts += offset
 
+        # Updating max range for each axis
+        for i in range(3):
+            max_range[i] = max(max_range[i], np.abs(verts[:, i]).max())
 
         # Plotting each Gaussian's isosurface
         ax.plot_trisurf(verts[:, 0], verts[:, 1], verts[:, 2], triangles=faces, color=color, alpha=0.6)
+
+    # Setting the same scale for all axes
+    max_limit = max(max_range)
+    ax.set_xlim(-max_limit, max_limit)
+    ax.set_ylim(-max_limit, max_limit)
+    ax.set_zlim(-max_limit, max_limit)
+
+    ax.set_aspect('equal') # Critical so that things are not squashed when there are different gaussian centers
 
     ax.set_xlabel('X Axis')
     ax.set_ylabel('Y Axis')
     ax.set_zlabel('Z Axis')
     plt.title('3D Isosurfaces of Multiple Gaussian Fields')
-
     plt.show()
+
 
 def generate_3d_gaussian_data(center, sigma, grid_size=50):
     # Generate Gaussian data centered at 'center' with standard deviation 'sigma'

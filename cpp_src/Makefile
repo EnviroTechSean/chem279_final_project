@@ -29,8 +29,8 @@ MO_POINTS_MAIN = mo_points_main
 .PHONY: all depend clean
 
 all:    $(OLD_MAIN) $(MO_POINTS_MAIN)
-	@echo  Simple compiler named $(OLD_MAIN) has been compiled
-	@echo  MO Points compiler named $(MO_POINTS_MAIN) has been compiled
+	@echo  Simple executable named $(OLD_MAIN) has been compiled
+	@echo  MO Points executable named $(MO_POINTS_MAIN) has been compiled
 
 $(OLD_MAIN): $(OBJS) 
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OLD_MAIN) $(OBJS) $(LFLAGS) $(LIBS)

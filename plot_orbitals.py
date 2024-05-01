@@ -1,9 +1,17 @@
+import os.path
+
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from scipy.interpolate import griddata
 
 import current_plot_test
+
+
+def generate_molecule_points(filename : str):
+    assert os.path.exists(os.path.join("sample_input", filename)), "File not found: May need to run from top-level dir until cleanup"
+    
+    # fill in here
 
 def generate_h2_points():
     A = np.loadtxt("cpp_src/s_0.00_0.00_0.00.txt")

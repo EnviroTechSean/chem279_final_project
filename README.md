@@ -10,6 +10,7 @@ Make a few example python plots with MatPlotLib to practice & demonstrate plotti
 
 Step 3:
 Refactor previous class code to my purposes and preferences
+    - Side note: personally I'm pretty big on no abbreviated variable names when I'm authoring something I lose confidence in this frequently haha
 
 Step 4: 
 Iterate through many different plotting techniques 
@@ -38,6 +39,8 @@ https://www.youtube.com/watch?v=PnwpoCDA5IM
 Open bug exists in matplotlib 3d scatter plot opacity:
 https://stackoverflow.com/questions/71904575/matplotlib-3d-scatter-plot-alpha-varies-when-viewing-different-angles
 references https://github.com/matplotlib/matplotlib/issues/22861
+
+Challenging to keep grid transformations straight between c++ and python grids/arma::cubes/np arrays, linspaces for subsequent use in matplotlib, etc
 
 # Usage
 To compile the code, enter the command `make all` under this directory.

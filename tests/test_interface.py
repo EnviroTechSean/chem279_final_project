@@ -3,6 +3,7 @@ import unittest
 import sys
 
 # add parent directory to sys.path
+# usage: pytest -v from this or parent directory
 current_script_path = os.path.abspath(__file__)  # Absolute path to the current script
 current_dir = os.path.dirname(current_script_path)  # Directory containing the current script
 parent_dir = os.path.dirname(current_dir)  # Parent directory
@@ -14,5 +15,8 @@ import plot_orbitals
 
 class TestPyCppInterface(unittest.TestCase):
     def test_generate_points(self):
-        H2_points = plot_orbitals.generate_h2_points()
-        self.assertTrue(len(H2_points) > 40)
+        H2_points = plot_orbitals.generate_molecule_points("H2.txt")
+        target_num_points = 40 
+        # 40 super arbitrary
+        # seemed like OK starting point balanced density/sparsity for interpolation
+        self.assertTrue(len(H2_points) > target_num_points) 
