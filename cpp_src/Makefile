@@ -36,7 +36,7 @@ $(OLD_MAIN): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OLD_MAIN) $(OBJS) $(LFLAGS) $(LIBS)
 
 $(MO_POINTS_MAIN): $(MO_POINTS_OBJS)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(MO_POINTS_MAIN) $(OBJS) $(LFLAGS) $(LIBS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(MO_POINTS_MAIN) $(MO_POINTS_OBJS) $(LFLAGS) $(LIBS)
 
 # Rule to convert .cpp to .o
 .cpp.o:

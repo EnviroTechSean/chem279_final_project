@@ -217,7 +217,7 @@ Molecule_basis::Molecule_basis(const string &fname) {
 }
 
 void Atom::PrintAOs() {
-  printf("THis is a %s atom\n", name.c_str());
+  printf("This is a %s atom\n", name.c_str());
   for (auto ao : mAOs)
     ao.printinfo();
   printf("\n");

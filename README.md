@@ -2,9 +2,13 @@
 
 Step 1:
 Add unit test checking that python was correctly getting points from the c++ code
+    1a: Determine point generation method
 
 Step 2: 
 Make a few example python plots with MatPlotLib to practice & demonstrate plotting techniques with matplotlib
+
+Step 3:
+Refactor previous class code to my purposes and preferences
 
 ## Code conventions
 Molecule/Atom symbols will be capitalized: Class names will be capitalized, pretty much everything else will be lower case and underscore separated.
@@ -13,7 +17,6 @@ Molecule/Atom symbols will be capitalized: Class names will be capitalized, pret
 3d plotting in matplotlib -
 https://www.youtube.com/watch?v=fAztJg9oi7s
 https://www.youtube.com/watch?v=PnwpoCDA5IM
-
 
 ## Problems encountered
 
