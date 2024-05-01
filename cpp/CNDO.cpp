@@ -182,8 +182,8 @@ double CNDO::getEnergy() {
   Ee += arma::dot(Ptotal, H_core);
   Etotal = Ee + Ec;
   cout << std::setprecision(10);
-  cout << "Nuclear Repulsion Energy is " << Ec << " eV." << endl;
-  cout << "Electron Energy is " << Ee << " eV." << endl;
+  // cout << "Nuclear Repulsion Energy is " << Ec << " eV." << endl;
+  // cout << "Electron Energy is " << Ee << " eV." << endl;
   return Etotal;
 }
 

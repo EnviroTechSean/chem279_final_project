@@ -35,6 +35,8 @@ public:
   virtual int run();
   virtual arma::mat getPa() { return Pa; }
   virtual arma::mat getPb() { return Pb; }
+  virtual arma::mat getCa() { return Ca; }
+  virtual arma::mat getCb() { return Cb; }
   virtual double getEnergy();
   arma::mat getGradient();
 };
