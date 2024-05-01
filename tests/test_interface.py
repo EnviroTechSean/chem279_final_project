@@ -16,7 +16,9 @@ import plot_orbitals
 class TestPyCppInterface(unittest.TestCase):
     def test_generate_atomic_orbital_points(self):
         plot_orbitals.generate_atomic_orbital_points("H2.txt")
-        plot_orbitals.get_atomic_orbital_points("H2.txt")
+        H2_points = plot_orbitals.get_atomic_orbital_points("H2.txt")
+
+    def test_read_orbital_points(self):
         target_num_points = 40 
         # 40 super arbitrary
         # seemed like OK starting point balanced density/sparsity for interpolation

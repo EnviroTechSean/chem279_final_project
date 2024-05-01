@@ -3,7 +3,7 @@
 Step 1:
 Add unit test checking that python was correctly getting points from the c++ code
     1a: Determine point generation method
-    1b: Write code for point evaluation
+    1b: Write c++ code for point evaluation
 
 Step 2: 
 Make a few example python plots with MatPlotLib to practice & demonstrate plotting techniques with matplotlib
@@ -19,6 +19,11 @@ Top 2 choices currently:
     scatter (but panning has a bug)
 
 Step 5: 
+Plot Atomic orbitals
+    5a: Test on H2
+    5b: Refactor, test on CH
+
+Step 6: 
 Plot Molecular orbitals
     5a: Decide visual representation of scalar MO coefficients
 
@@ -30,10 +35,6 @@ Molecule/Atom symbols will be capitalized: Class names will be capitalized, pret
 Marching Cubes Algorithm for Isosurface plotting:
 https://scikit-image.org/docs/stable/auto_examples/edges/plot_marching_cubes.html
 
-3d plotting in matplotlib -
-https://www.youtube.com/watch?v=fAztJg9oi7s
-https://www.youtube.com/watch?v=PnwpoCDA5IM
-
 ## Problems encountered
 
 Open bug exists in matplotlib 3d scatter plot opacity:
@@ -43,10 +44,8 @@ references https://github.com/matplotlib/matplotlib/issues/22861
 Challenging to keep grid transformations straight between c++ and python grids/arma::cubes/np arrays, linspaces for subsequent use in matplotlib, etc
 
 # Usage
-To compile the code, enter the command `make all` under this directory.
+To compile the code, enter the command `make all` under the cpp_src directory.
 
-```
-./HW5 <filename>
-```
-`<filename>`: The path to the input file containing information of the molecule.
+plot_orbitals.py should provide a rudimentary interface for calling that executable as a subprocess & plotting that data
+
 
