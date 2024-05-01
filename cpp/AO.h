@@ -12,7 +12,7 @@ private:
   arma::vec d_coefs;
   arma::uvec lmn;
   std::string label;
-  int num_primatives;
+  int num_primitives;
   // Atom *belong;
 public:
   Atomic_orbital(arma::vec &center_input, arma::vec &alpha_input, arma::vec &d_input,
@@ -23,7 +23,7 @@ public:
   arma::vec get_alpha() { return exponents; }
   arma::vec get_d_coe() { return d_coefs; }
   arma::vec get_center() { return center; }
-  int get_num_primatives() { return num_primatives; }
+  int get_num_primitives() { return num_primitives; }
   std::string get_label() { return label; }
   void set_center(arma::vec &centeri) { center = centeri; }
   // void set_belongAtom(Atom *belongi){ belong = belongi;}

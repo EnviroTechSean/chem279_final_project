@@ -31,8 +31,8 @@ Atomic_orbital::Atomic_orbital(arma::vec &center_input, arma::vec &exponents_inp
   assert(center.n_elem == 3);
   assert(lmn.n_elem == 3);
   assert(d_coefs.n_elem == exponents.n_elem);
-  num_primatives = exponents.n_elem;
-  for (size_t k = 0; k < num_primatives; k++) {
+  num_primitives = exponents.n_elem;
+  for (size_t k = 0; k < num_primitives; k++) {
     double Overlap_Self =
         Overlap_3d(center, center, exponents(k), exponents(k), lmn, lmn);
     d_coefs(k) /= sqrt(Overlap_Self);
@@ -51,7 +51,7 @@ double Atomic_orbital::evaluate(const arma::vec &point) const
 
   double primitive_contribution;
 
-  for (size_t i = 0; i < num_primatives; i++)
+  for (size_t i = 0; i < num_primitives; i++)
   {
     // Start by multiplying the x y and z distances to the primitive contribution
     primitive_contribution = pow(x_diff, lmn[0]) * pow(y_diff, lmn[1]) * pow(z_diff, lmn[2]);
@@ -65,55 +65,65 @@ double Atomic_orbital::evaluate(const arma::vec &point) const
   return total_value;
 }
 
+std::string make_label(std::string atom_name, std::string orbital_type, arma::uvec lmn, arma::vec center) {
+    std::ostringstream oss;
+    oss << atom_name << orbital_type;
+    for (auto l : lmn) {
+        oss << l;
+    }
+    oss << std::fixed << std::setprecision(3);
+    for (size_t i = 0; i < center.size(); ++i) {
+        oss << "_" << center(i);
+    }
+    return oss.str();
+}
+
 
 std::map<std::string, int> VAN_map{
     {"H", 1}, {"C", 4}, {"N", 5}, {"O", 6}, {"F", 7},
 };
+
 Atom GenerateAtom(std::string atomname, arma::vec center) {
-  std::string basisname = "../basis/" + atomname + "_STO3G.txt";
-  arma::mat basis;
-  basis.load(basisname);
+    std::string basisname = "../basis/" + atomname + "_STO3G.txt";
+    arma::mat basis;
+    basis.load(basisname);
 
-  arma::uvec lmn = {0, 0, 0};
-  arma::vec alpha = basis.col(0);
-  arma::vec d_coe = basis.col(1);
-  string label("s");
+    arma::uvec lmn = {0, 0, 0};
+    arma::vec alpha = basis.col(0);
+    arma::vec d_coe = basis.col(1);
 
-  // Convert each double in the center vector to string with precision and add to label
-  std::ostringstream oss;
-  oss << std::fixed << std::setprecision(2); // Set precision to 2 decimal places
-  for (size_t i = 0; i < center.size(); ++i) {
-    oss << "_" << center(i);
-  }
-  // Append coordinates to label
-  label += oss.str();
+    // Use make_label function to create label
+    std::string label = make_label(atomname, "s", lmn, center);
 
-  Atomic_orbital AO_s(center, alpha, d_coe, lmn, label);
-  if (atomname == string("H")) {
-    Atom aatom(atomname, 1);
+    Atomic_orbital AO_s(center, alpha, d_coe, lmn, label);
+    if (atomname == std::string("H")) {
+        Atom aatom(atomname, 1);
+        aatom.addAO(AO_s);
+        return aatom;
+    }
+    if (VAN_map.find(atomname) == VAN_map.end()) {
+        throw std::invalid_argument("Do not support this kind of atom.");
+    }
+    int atomicnumber = VAN_map[atomname];
+    Atom aatom(atomname, atomicnumber);
     aatom.addAO(AO_s);
+
+    for (size_t j = 0; j < 3; j++) {
+        d_coe = basis.col(2);
+        lmn.zeros();
+        lmn(j) = 1;
+        
+        // Update label for p orbital
+        label = make_label(atomname, "p", lmn, center);
+        Atomic_orbital readedAOp(center, alpha, d_coe, lmn, label);
+        aatom.addAO(readedAOp);
+    }
     return aatom;
-  }
-  if (VAN_map.find(atomname) == VAN_map.end()) {
-    throw invalid_argument("Do not support this kind of atom.");
-  }
-  int atomicnumber = VAN_map[atomname];
-  Atom aatom(atomname, atomicnumber);
-  aatom.addAO(AO_s);
-  for (size_t j = 0; j < 3; j++) {
-    d_coe = basis.col(2);
-    lmn.zeros();
-    lmn(j) = 1;
-    string label("p");
-    Atomic_orbital readedAOp(center, alpha, d_coe, lmn, label);
-    aatom.addAO(readedAOp);
-  }
-  return aatom;
 }
 
 double Eval_Ov_AOs(Atomic_orbital &ao1, Atomic_orbital &ao2) {
-  int len = ao1.get_num_primatives();
-  assert(ao2.get_num_primatives() == len);
+  int len = ao1.get_num_primitives();
+  assert(ao2.get_num_primitives() == len);
   arma::vec alphaa = ao1.get_alpha(), alphab = ao2.get_alpha();
   arma::vec Ra = ao1.get_center(), Rb = ao2.get_center();
   arma::uvec la = ao1.get_lmn(), lb = ao2.get_lmn();
@@ -134,8 +144,8 @@ double Eval_Ov_AOs(Atomic_orbital &ao1, Atomic_orbital &ao2) {
 
 void Eval_Ov1st_AOs(arma::vec &OV1st, Atomic_orbital &ao1,
                     Atomic_orbital &ao2) {
-  int len = ao1.get_num_primatives();
-  assert(ao2.get_num_primatives() == len);
+  int len = ao1.get_num_primitives();
+  assert(ao2.get_num_primitives() == len);
   arma::vec alphaa = ao1.get_alpha(), alphab = ao2.get_alpha();
   arma::vec Ra = ao1.get_center(), Rb = ao2.get_center();
   arma::uvec la = ao1.get_lmn(), lb = ao2.get_lmn();
@@ -161,8 +171,8 @@ double Eval_2eI_sAO(Atomic_orbital &ao1, Atomic_orbital &ao2) {
   arma::uvec la = ao1.get_lmn(), lb = ao2.get_lmn();
   if (!(arma::accu(la) == 0 && arma::accu(lb) == 0))
     throw invalid_argument("Eval_2eI_sAO is only used for s Orbitals.");
-  int len = ao1.get_num_primatives();
-  assert(ao2.get_num_primatives() == len);
+  int len = ao1.get_num_primitives();
+  assert(ao2.get_num_primitives() == len);
   arma::vec Ra = ao1.get_center(), Rb = ao2.get_center();
   arma::vec alphaa = ao1.get_alpha(), alphab = ao2.get_alpha();
   arma::vec da = ao1.get_d_coe(), db = ao2.get_d_coe();
@@ -190,8 +200,8 @@ void Eval_2eI1st_sAO(arma::vec &Gamma1st, Atomic_orbital &ao1,
   arma::uvec la = ao1.get_lmn(), lb = ao2.get_lmn();
   if (!(arma::accu(la) == 0 && arma::accu(lb) == 0))
     throw invalid_argument("Eval_2eI_sAO is only used for s Orbitals.");
-  int len = ao1.get_num_primatives();
-  assert(ao2.get_num_primatives() == len);
+  int len = ao1.get_num_primitives();
+  assert(ao2.get_num_primitives() == len);
   arma::vec Ra = ao1.get_center(), Rb = ao2.get_center();
   arma::vec alphaa = ao1.get_alpha(), alphab = ao2.get_alpha();
   arma::vec da = ao1.get_d_coe(), db = ao2.get_d_coe();

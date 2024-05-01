@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compilation flags: -Wall for compiler warnings, -g for debugging information
-CXXFLAGS = -Wall -g
+CXXFLAGS = -Wall -g -Wno-sign-compare
 
 # Include directories for header files
 INCLUDES = -I/usr/include
@@ -17,7 +17,7 @@ LIBS = -larmadillo
 SRCS = main.cpp CNDO.cpp util.cpp AO.cpp
 MO_POINTS_SRCS = generate_mo_points.cpp CNDO.cpp util.cpp AO.cpp
 
-# Object files, derived from SRCS
+# Object files, derived from SRC3S
 OBJS = $(SRCS:.cpp=.o)
 MO_POINTS_OBJS = $(MO_POINTS_SRCS:.cpp=.o)
 
@@ -29,8 +29,8 @@ MO_POINTS_MAIN = mo_points_main
 .PHONY: all depend clean
 
 all:    $(OLD_MAIN) $(MO_POINTS_MAIN)
-	@echo  Simple executable named $(OLD_MAIN) has been compiled
-	@echo  MO Points executable named $(MO_POINTS_MAIN) has been compiled
+	@echo  Executable named $(OLD_MAIN) running target level of theory calculations
+	@echo  Orbital points executable named $(MO_POINTS_MAIN) has been compiled
 
 $(OLD_MAIN): $(OBJS) 
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OLD_MAIN) $(OBJS) $(LFLAGS) $(LIBS)
