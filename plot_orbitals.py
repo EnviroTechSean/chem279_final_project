@@ -1,5 +1,7 @@
 import os.path
 
+import subprocess # subprocess is for calling the c++ calculations, see generate_molecule_points
+
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
@@ -8,10 +10,24 @@ from scipy.interpolate import griddata
 import current_plot_test
 
 
-def generate_molecule_points(filename : str):
-    assert os.path.exists(os.path.join("sample_input", filename)), "File not found: May need to run from top-level dir until cleanup"
+def generate_atomic_orbital_points(filename: str):
+    input_path = os.path.join("sample_input", filename)
+    assert os.path.exists(input_path), "File not found: May need to run from top-level dir until cleanup"
     
-    # fill in here
+    # Construct the output file name based on the input file name
+    output_file = filename.replace('.txt', '_output.txt')
+    output_path = os.path.join("cpp_src", output_file)
+    
+    # Construct the command to run the C++ executable
+    command = f"./mo_points_main {input_path}"
+    
+    # Run the C++ executable
+    subprocess.run(command, shell=True, check=True)
+    
+    # Check if the output file was created
+    assert os.path.exists(output_path), "Output file not created by the C++ program"
+    
+    return output_path
 
 def generate_h2_points():
     A = np.loadtxt("cpp_src/s_0.00_0.00_0.00.txt")
