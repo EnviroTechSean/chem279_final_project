@@ -14,10 +14,8 @@ def generate_atomic_orbital_points(filename: str):
     input_path = os.path.join("sample_input", filename)
     assert os.path.exists(input_path), "File not found: May need to run from top-level dir until cleanup"
 
-    # Construct the command to run the C++ executable
-    command = f"./mo_points_main {input_path}"
-    
-    # Run the C++ executable
+    assert os.path.exists(os.path.join("cpp", "mo_points_main")), "C++ Executable not compiled"
+    command = f"./mo_points_main {input_path}" # mo_points_main takes the path to the file as an arg
     subprocess.run(command, shell=True, check=True)
     
     # Check if the output file was created

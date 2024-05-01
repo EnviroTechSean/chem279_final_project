@@ -16,7 +16,9 @@ import plot_orbitals
 class TestPyCppInterface(unittest.TestCase):
     def test_generate_atomic_orbital_points(self):
         plot_orbitals.generate_atomic_orbital_points("H2.txt")
-        H2_points = plot_orbitals.get_atomic_orbital_points("H2.txt")
+        self.assertTrue(os.path.exists("H0._0.000_0.000_0.000.txt"))
+        self.assertTrue(os.path.exists("H1s_1.398_0.000_0.000.txt"))
+
 
     def test_read_orbital_points(self):
         target_num_points = 40 
