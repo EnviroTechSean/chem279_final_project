@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compilation flags: -Wall for compiler warnings, -g for debugging information
-CXXFLAGS = -Wall -g -Wno-sign-compare
+CXXFLAGS = -Wall -g -Wno-sign-compare -Wno-unused-variable
 
 # Include directories for header files
 INCLUDES = -I/usr/include

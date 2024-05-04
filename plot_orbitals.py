@@ -123,11 +123,11 @@ def plot_electron_density(directory, centers):
 
 if __name__ == "__main__":
     ho_centers = [(0.0, 0.0, 0.0), (1.830, 0.0, 0.0)] # Manually added for the black dots in the plots
-    plot_ho_atomic_orbitals(ho_centers)
+    # plot_ho_atomic_orbitals(ho_centers)
     # plot_alpha_orbitals("cpp", ho_centers)
     # plot_electron_density("cpp", ho_centers)
 
     h2o_centers = [(0.0, 0.0, 0.0), (0.0, -1.426, -0.888), (0.0, 1.426, -0.888)]
     # plot_h2o_atomic_orbitals(h2o_centers)
-    # plot_alpha_orbitals("cpp", h2o_centers)
+    plot_alpha_orbitals("cpp", h2o_centers)
     # plot_electron_density("cpp", h2o_centers)
