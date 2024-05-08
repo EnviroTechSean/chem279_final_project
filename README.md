@@ -1,5 +1,15 @@
 # chem279_final_project
 
+## Usage:
+
+From this directory:
+1) cd cpp
+2) make all
+3) cd ../
+4) python plot_orbitals.py <path to your molecule input file here>
+
+## Development steps
+
 Step 1:
 Add unit test checking that python was correctly getting points from the c++ code
     1a: Determine point generation method
