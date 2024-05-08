@@ -83,10 +83,12 @@ std::map<std::string, int> VAN_map{
     {"H", 1}, {"C", 4}, {"N", 5}, {"O", 6}, {"F", 7},
 };
 
-Atom GenerateAtom(std::string atomname, arma::vec center) {
-    std::string basisname = "../basis/" + atomname + "_STO3G.txt";
+Atom GenerateAtom(std::string atomname, arma::vec center, const std::string& basisPath) {
+    std::string basisname = basisPath + "/" + atomname + "_STO3G.txt";
     arma::mat basis;
-    basis.load(basisname);
+    if (!basis.load(basisname)) {
+        throw std::runtime_error("Failed to load basis file: " + basisname);
+    }
 
     arma::uvec lmn = {0, 0, 0};
     arma::vec alpha = basis.col(0);
@@ -96,7 +98,7 @@ Atom GenerateAtom(std::string atomname, arma::vec center) {
     std::string label = make_label(atomname, "s", lmn, center);
 
     Atomic_orbital AO_s(center, alpha, d_coe, lmn, label);
-    if (atomname == std::string("H")) {
+    if (atomname == "H") {
         Atom aatom(atomname, 1);
         aatom.addAO(AO_s);
         return aatom;
@@ -120,6 +122,7 @@ Atom GenerateAtom(std::string atomname, arma::vec center) {
     }
     return aatom;
 }
+
 
 double Eval_Ov_AOs(Atomic_orbital &ao1, Atomic_orbital &ao2) {
   int len = ao1.get_num_primitives();
@@ -222,47 +225,49 @@ void Eval_2eI1st_sAO(arma::vec &Gamma1st, Atomic_orbital &ao1,
 
 std::map<std::string, std::string> AN_map{
     {"1", "H"}, {"6", "C"}, {"7", "N"}, {"8", "O"}, {"9", "F"}};
-Molecule_basis::Molecule_basis(const string &fname) {
-  int num_charge, num_Atoms;
+Molecule_basis::Molecule_basis(const string &fname, const string &basisPath) {
+    int num_charge, num_Atoms;
 
-  ifstream in(fname, ios::in);
-  // cout << fname;
-
-  string line;
-  getline(in, line);
-  istringstream iss(line);
-  if (!(iss >> num_Atoms >> num_charge))
-    throw invalid_argument("There is some problem with molecule format.");
-  int count_atoms = 0;
-
-  while (getline(in, line)) {
-    istringstream iss(line);
-    arma::vec center(3);
-    // int AtomicN = 0;
-    string atomnumber;
-    if (!(iss >> atomnumber >> center[0] >> center[1] >> center[2]))
-      throw invalid_argument("There is some problem with AO format.");
-
-    if (AN_map.find(atomnumber) == AN_map.end()) {
-      throw invalid_argument("Do not support this kind of atom.");
+    ifstream in(fname, ios::in);
+    if (!in.is_open()) {
+        throw std::invalid_argument("Failed to open input file: " + fname);
     }
 
-    string atomname = AN_map[atomnumber];
-    arma::uvec lmn = {0, 0, 0};
-    Atom readAtom = GenerateAtom(atomname, center);
-    mAtoms.push_back(readAtom);
-    // cout << readAO << std::endl;
-    count_atoms++;
-  }
-  if (count_atoms != num_Atoms) {
-    throw invalid_argument("Number of AOs are not consistent ");
-  }
-  in.close();
-  num_ele = 0;
-  for (auto atom : mAtoms)
-    num_ele += atom.VAN;
-  num_ele -= num_charge;
+    string line;
+    getline(in, line);
+    istringstream iss(line);
+    if (!(iss >> num_Atoms >> num_charge)) {
+        throw std::invalid_argument("There is some problem with molecule format.");
+    }
+    int count_atoms = 0;
+
+    while (getline(in, line)) {
+        istringstream iss(line);
+        arma::vec center(3);
+        string atomnumber;
+        if (!(iss >> atomnumber >> center[0] >> center[1] >> center[2])) {
+            throw std::invalid_argument("There is some problem with AO format.");
+        }
+
+        if (AN_map.find(atomnumber) == AN_map.end()) {
+            throw std::invalid_argument("Unsupported atom type.");
+        }
+
+        string atomname = AN_map[atomnumber];
+        Atom readAtom = GenerateAtom(atomname, center, basisPath);
+        mAtoms.push_back(readAtom);
+        count_atoms++;
+    }
+    if (count_atoms != num_Atoms) {
+        throw std::invalid_argument("The number of atoms provided does not match the expected number.");
+    }
+    in.close();
+    num_ele = 0;
+    for (auto atom : mAtoms)
+        num_ele += atom.VAN;
+    num_ele -= num_charge; // Adjusting for net charge
 }
+
 
 void Atom::PrintAOs() {
   printf("This is a %s atom\n", name.c_str());

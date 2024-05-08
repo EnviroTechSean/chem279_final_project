@@ -121,58 +121,58 @@ arma::cube sum_electron_density_cube(const std::vector<arma::cube>& alpha_MOs, c
 
 
 int main(int argc, char *argv[]) {
-  if (argc != 2) {
-    printf("usage generate_mo_points filename, for example ./generate_mo_points ../sample_input/H2.txt\n");
-    return EXIT_FAILURE;
-  }
-  string fname(argv[1]);
-  try {
-    Molecule_basis mol(fname);
-    // mol.PrintAtoms();
+    if (argc != 3) {
+        printf("Usage: ./mo_points_main <path_to_input> <basis_directory>\n");
+        return EXIT_FAILURE;
+    }
+    string fname(argv[1]);
+    string basisPath = argv[2];  // Path to the basis directory
 
-    // Define the grid properties
-    arma::vec lower_bounds = {-10.0, -10.0, -10.0}; // Example bounds
-    arma::vec upper_bounds = {10.0, 10.0, 10.0};
-    arma::ivec grid_points = {50, 50, 50}; // 50x50x50 grid
-    std::string atom_string = "";
+    try {
+        Molecule_basis mol(fname, basisPath);
+        // mol.PrintAtoms();
 
-    // Evaluate each atomic orbital on the grid
-    for (Atom& atom : mol.mAtoms) {
-      atom_string += atom.name;
-        for (Atomic_orbital& orbital : atom.mAOs) {
-            arma::cube orbital_values = evaluate_grid_for_orbital(orbital, lower_bounds, upper_bounds, grid_points);
-            std::string output_filename = orbital.get_label() + ".txt";
-            orbital_values.save(output_filename, arma::raw_ascii);
+        // Define the grid properties
+        arma::vec lower_bounds = {-10.0, -10.0, -10.0}; // Example bounds
+        arma::vec upper_bounds = {10.0, 10.0, 10.0};
+        arma::ivec grid_points = {50, 50, 50}; // 50x50x50 grid
+        std::string atom_string = "";
+
+        // Evaluate each atomic orbital on the grid
+        for (Atom& atom : mol.mAtoms) {
+            atom_string += atom.name;
+            for (Atomic_orbital& orbital : atom.mAOs) {
+                arma::cube orbital_values = evaluate_grid_for_orbital(orbital, lower_bounds, upper_bounds, grid_points);
+                std::string output_filename = orbital.get_label() + ".txt";
+                orbital_values.save(output_filename, arma::raw_ascii);
+            }
         }
+
+        // Now make the molecular orbitals (linear combinations of atomic orbitals per MO coefficients)
+        std::vector<arma::cube> alpha_MOs = evaluate_molecular_orbitals(mol, lower_bounds, upper_bounds, grid_points);
+        for (int i = 0; i < alpha_MOs.size(); i++) {
+            arma::cube current_MO = alpha_MOs[i];
+            std::string output_filename = atom_string + "_alpha_MO_" + std::to_string(i) + ".txt";
+            current_MO.save(output_filename, arma::raw_ascii);
+        }
+
+        // Now make the beta molecular orbitals
+        std::vector<arma::cube> beta_MOs = evaluate_molecular_orbitals(mol, lower_bounds, upper_bounds, grid_points, false);
+        for (int i = 0; i < beta_MOs.size(); i++) {
+            arma::cube current_MO = beta_MOs[i];
+            std::string output_filename = atom_string + "_beta_MO_" + std::to_string(i) + ".txt";
+            current_MO.save(output_filename, arma::raw_ascii);
+        }
+
+        // Calculate electron densities
+        arma::cube electron_densities = sum_electron_density_cube(alpha_MOs, beta_MOs);
+        std::string output_filename = atom_string + "_electron_densities" + ".txt";
+        electron_densities.save(output_filename, arma::raw_ascii);
+
+    } catch (const std::exception& e) {
+        cerr << "Error: " << e.what() << endl;
+        return EXIT_FAILURE;
     }
 
-    // Now make the molecular orbitals (linear combinations of atomic orbitals per MO coeffs)
-    std::vector<arma::cube> alpha_MOs = evaluate_molecular_orbitals(mol, lower_bounds, upper_bounds, grid_points);
-    for (int i = 0; i < alpha_MOs.size(); i++)
-    {
-      arma::cube current_MO = alpha_MOs[i];
-      std::string output_filename = atom_string + "_alpha_MO_" + std::to_string(i) + ".txt";
-      current_MO.save(output_filename, arma::raw_ascii);
-    }
-
-    // Now make the molecular orbitals (linear combinations of atomic orbitals per MO coeffs)
-    std::vector<arma::cube> beta_MOs = evaluate_molecular_orbitals(mol, lower_bounds, upper_bounds, grid_points, false);
-    for (int i = 0; i < beta_MOs.size(); i++)
-    {
-      arma::cube current_MO = beta_MOs[i];
-      std::string output_filename = atom_string + "_beta_MO_" + std::to_string(i) + ".txt";
-      current_MO.save(output_filename, arma::raw_ascii);
-    }
-
-    // Dang professor was right in office hours, once I checked my notes this step was indeed easier than I remembered
-    arma::cube electron_densities = sum_electron_density_cube(alpha_MOs, beta_MOs);
-    std::string output_filename = atom_string + "_electron_densities" + ".txt";
-    electron_densities.save(output_filename, arma::raw_ascii);
-
-  } catch (invalid_argument &e) {
-    cerr << e.what() << endl;
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from skimage.measure import marching_cubes
 
 POSITIVE_ISOSURFACE_OPACITY = 0.7
@@ -18,7 +17,7 @@ def add_isosurface(ax, data, level, color, alpha, grid_range=(-1, 1)):
 
     return np.max(np.abs(verts), axis=0)  # Return max absolute values of the vertices for range calculation
 
-def plot_filtered_surfaces(datasets, levels, colors, centers, grid_range=(-1, 1), plot_negative_isos = False):
+def plot_filtered_surfaces(datasets, levels, colors, centers, title, grid_range=(-1, 1), plot_negative_isos = False):
     fig = plt.figure(figsize=(12, 10))
     ax = fig.add_subplot(111, projection='3d')
 
@@ -32,7 +31,9 @@ def plot_filtered_surfaces(datasets, levels, colors, centers, grid_range=(-1, 1)
             try:
                 add_isosurface(ax, data, -level, color, NEGATIVE_ISOSURFACE_OPACITY, grid_range)  # Plot negative isosurface
             except Exception as e:
-                print(f"Unable to plot negative isosurface for level {level}: {e}")
+                pass 
+                # print(f"Unable to plot negative isosurface for level {level}: {e}")
+                # The above print was confusing, it implied a problem but  not all orbitals have negative isosurfaces
 
 
     # Plotting the center points after isosurface plotting to avoid depending on their count
@@ -47,7 +48,7 @@ def plot_filtered_surfaces(datasets, levels, colors, centers, grid_range=(-1, 1)
     ax.set_xlabel('X Axis')
     ax.set_ylabel('Y Axis')
     ax.set_zlabel('Z Axis')
-    plt.title('3D Isosurfaces')
+    plt.title(title)
     plt.show()
 
 def plot_point_cloud(datasets, grid_range=(-1, 1), value_threshold=0.1):
